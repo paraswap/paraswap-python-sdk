@@ -22,7 +22,6 @@ http_providers = {
     Network.Arbiturm: environ.get('RPC_HTTP_42161'),
     Network.Avalanche: environ.get('RPC_HTTP_43114'),
 }
-print(http_providers[Network.Polygon])
 provider = HTTPProvider(http_providers[Network.Polygon])
 web3 = Web3(provider)
 account = web3.eth.account.from_key(pk)
@@ -34,7 +33,6 @@ onChainHelper = OrderOnChainHelper(
 
 nonce = web3.eth.get_transaction_count(account.address)
 
-# print(nonce)
 # res = onChainHelper.cancel_order(order_hash, {
 #     'nonce': nonce,
 #     'gasPrice': web3.toWei('35', 'gwei'),
