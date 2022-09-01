@@ -1,13 +1,13 @@
+from os import environ
 from web3 import HTTPProvider, Web3
 from web3.middleware import geth_poa_middleware
-from src.orders.order import createOrder
-from src.types import Network
-from src.orders.onchain_api import OrderOnChainHelper, OrderWithSignature
-from src.orders.fungible_api import FungibleApi
-from os import environ
-from dotenv import load_dotenv
+from paraswap.orders.order import createOrder
+from paraswap.types import Network
+from paraswap.orders.order_helper import OrderHelper, OrderWithSignature
+from paraswap.orders.fungible_api import FungibleApi
+from paraswap.types import Network
 
-from src.types import Network
+from dotenv import load_dotenv
 
 load_dotenv()
 
@@ -28,7 +28,7 @@ provider = HTTPProvider(http_providers[Network.Polygon])
 web3 = Web3(provider)
 account = web3.eth.account.from_key(pk)
 web3.middleware_onion.inject(geth_poa_middleware, layer=0)
-onChainHelper = OrderOnChainHelper(
+onChainHelper = OrderHelper(
     Network.Polygon,
     web3,
 )

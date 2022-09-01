@@ -8,7 +8,7 @@ from ..config import AUGUSTUS_RFQ
 from ..abi.augustus_rfq_abi import AUGUSTUS_RFQ_ABI
 from ..types import Network
 
-class OrderOnChainHelper():
+class OrderHelper():
 
     web3: Web3
     augustus_rfq_address: str
