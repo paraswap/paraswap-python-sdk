@@ -1,5 +1,6 @@
-from typing import TypeVar
 from enum import IntEnum
+from typing import TypeVar
+
 
 class Network(IntEnum):
     Ethereum = 1
@@ -11,6 +12,7 @@ class Network(IntEnum):
     Arbiturm = 42161
     Avalanche = 43114
 
-T = TypeVar('T')
+
+T = TypeVar("T")
 
 MapToNetwork = dict[Network, T]

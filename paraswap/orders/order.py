@@ -1,9 +1,16 @@
 from web3 import Web3
-from ..constants import MAX_UINT256_VALUE
-from .utils import AssetType, encode_asset_address_with_asset_type, generate_nonce_and_add_taker, random_uint
-from .types import Order, OrderNFT
 
-def createOrder(
+from ..constants import MAX_UINT256_VALUE
+from .types import Order, OrderNFT
+from .utils import (
+    AssetType,
+    encode_asset_address_with_asset_type,
+    generate_nonce_and_add_taker,
+    random_uint,
+)
+
+
+def create_order(
     expiry: int,
     maker: str,
     taker: str,
@@ -12,13 +19,13 @@ def createOrder(
     maker_amount: int,
     taker_amount: int,
     nonce_and_meta: int = -1,
-    ) -> Order:
+) -> Order:
     if nonce_and_meta == -1:
         nonce_and_meta = random_uint(MAX_UINT256_VALUE)
 
     return Order(
         nonceAndMeta=nonce_and_meta,
-        expiry= expiry,
+        expiry=expiry,
         maker=Web3.toChecksumAddress(maker),
         taker=Web3.toChecksumAddress(taker),
         makerAsset=Web3.toChecksumAddress(maker_asset),
@@ -27,7 +34,8 @@ def createOrder(
         takerAmount=taker_amount,
     )
 
-def createManagedOrder(
+
+def create_managed_order(
     expiry: int,
     maker: str,
     taker: str,
@@ -39,7 +47,7 @@ def createManagedOrder(
 ):
     # encode taker address inside the nonce and meta and generate a random nonce
     nonce_and_meta = generate_nonce_and_add_taker(actual_taker)
-    return createOrder(
+    return create_order(
         expiry=expiry,
         maker=maker,
         taker=taker,
@@ -50,7 +58,8 @@ def createManagedOrder(
         nonce_and_meta=nonce_and_meta,
     )
 
-def createOrderNFT(
+
+def create_order_nft(
     maker: str,
     taker: str,
     maker_asset: str,
@@ -62,7 +71,7 @@ def createOrderNFT(
     maker_asset_id: int = 0,
     taker_asset_id: int = 0,
     nonce_and_meta: int = -1,
-    ) -> OrderNFT:
+) -> OrderNFT:
     if nonce_and_meta == -1:
         nonce_and_meta = random_uint(MAX_UINT256_VALUE)
 
@@ -78,7 +87,8 @@ def createOrderNFT(
         takerAmount=taker_amount,
     )
 
-def createManagedOrderNFT(
+
+def create_managed_order_nft(
     maker: str,
     taker: str,
     maker_asset: str,
@@ -90,10 +100,10 @@ def createManagedOrderNFT(
     actual_taker: str,
     maker_asset_id: int = 0,
     taker_asset_id: int = 0,
-    ) -> OrderNFT:
+) -> OrderNFT:
     # encode taker address inside the nonce and meta and generate a random nonce
     nonce_and_meta = generate_nonce_and_add_taker(actual_taker)
-    return createOrderNFT(
+    return create_order_nft(
         maker=maker,
         taker=taker,
         maker_asset=maker_asset,

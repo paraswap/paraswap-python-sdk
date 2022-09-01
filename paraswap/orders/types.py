@@ -1,7 +1,8 @@
-from typing import Optional, TypedDict
-from typing_extensions import NotRequired
-from eip712_structs import EIP712Struct, Uint, Address
 from enum import Enum, IntEnum
+from typing import Optional, TypedDict
+
+from eip712_structs import Address, EIP712Struct, Uint
+from typing_extensions import NotRequired  # type: ignore
 
 # struct Order {
 #     uint256 nonceAndMeta; // Nonce and taker specific metadata
@@ -14,6 +15,7 @@ from enum import Enum, IntEnum
 #     uint256 takerAmount;
 # }
 
+
 class Order(EIP712Struct):
     nonceAndMeta = Uint(256)
     expiry = Uint(128)
@@ -24,7 +26,8 @@ class Order(EIP712Struct):
     makerAmount = Uint(256)
     takerAmount = Uint(256)
 
-class OrderWithSignature():
+
+class OrderWithSignature:
     order: Order
     signature: str
     hash: str
@@ -37,21 +40,23 @@ class OrderWithSignature():
     def cast_to_dict(self):
         order = self.order.data_dict()
         return {
-            'nonceAndMeta': str(order['nonceAndMeta']),
-            'expiry': str(order['expiry']),
-            'maker': str(order['maker']),
-            'taker': str(order['taker']),
-            'makerAsset': str(order['makerAsset']),
-            'takerAsset': str(order['takerAsset']),
-            'makerAmount': str(order['makerAmount']),
-            'takerAmount': str(order['takerAmount']),
-            'signature': self.signature
+            "nonceAndMeta": str(order["nonceAndMeta"]),
+            "expiry": str(order["expiry"]),
+            "maker": str(order["maker"]),
+            "taker": str(order["taker"]),
+            "makerAsset": str(order["makerAsset"]),
+            "takerAsset": str(order["takerAsset"]),
+            "makerAmount": str(order["makerAmount"]),
+            "takerAmount": str(order["takerAmount"]),
+            "signature": self.signature,
         }
 
+
 class AssetType(IntEnum):
-    ERC20 = 0,
-    ERC1155 = 1,
-    ERC712 = 2,
+    ERC20 = (0,)
+    ERC1155 = (1,)
+    ERC712 = (2,)
+
 
 # struct OrderNFT {
 #     uint256 nonceAndMeta; // Nonce and taker specific metadata
@@ -66,6 +71,7 @@ class AssetType(IntEnum):
 #     uint256 takerAmount;
 # }
 
+
 class OrderNFT(EIP712Struct):
     nonceAndMeta = Uint(256)
     expiry = Uint(128)
@@ -78,15 +84,18 @@ class OrderNFT(EIP712Struct):
     makerAmount = Uint(256)
     takerAmount = Uint(256)
 
+
 class OrderType(Enum):
-    LIMIT = 'LIMIT'
-    P2P = 'P2P'
+    LIMIT = "LIMIT"
+    P2P = "P2P"
+
 
 class OrderState(Enum):
-    PENDING = 'PENDING'
-    FULFILLED = 'FULFILLED'
-    CANCELLED = 'CANCELLED'
-    EXPIRED = 'EXPIRED'
+    PENDING = "PENDING"
+    FULFILLED = "FULFILLED"
+    CANCELLED = "CANCELLED"
+    EXPIRED = "EXPIRED"
+
 
 class OrderApiResponse(TypedDict):
     expiry: int
@@ -111,8 +120,10 @@ class OrderApiResponse(TypedDict):
     type: OrderType
     state: OrderState
 
+
 class OrderApiCreationResponse(TypedDict):
     order: OrderApiResponse
+
 
 class OrdersApiResponse(TypedDict):
     limit: int

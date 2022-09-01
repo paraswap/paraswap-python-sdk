@@ -1,9 +1,9 @@
 [tool.isort]
 profile = "black"
-line_length = 120
+line_length = 90
 
 [tool.black]
-line-length = 120
+line-length = 90
 include = '\.pyi?$'
 exclude = '''
 /(
