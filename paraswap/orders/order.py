@@ -1,5 +1,8 @@
 from web3 import Web3
 
+from paraswap.config import AUGUSTUS
+from paraswap.types import Network
+
 from ..constants import MAX_UINT256_VALUE
 from .types import Order, OrderNFT
 from .utils import (
@@ -36,9 +39,9 @@ def create_order(
 
 
 def create_managed_order(
+    network: Network,
     expiry: int,
     maker: str,
-    taker: str,
     maker_asset: str,
     taker_asset: str,
     maker_amount: int,
@@ -50,7 +53,31 @@ def create_managed_order(
     return create_order(
         expiry=expiry,
         maker=maker,
-        taker=taker,
+        taker=AUGUSTUS[network],  # ParaSwap managed orders ALWAYS go through AUGUSTUS
+        maker_asset=maker_asset,
+        taker_asset=taker_asset,
+        maker_amount=maker_amount,
+        taker_amount=taker_amount,
+        nonce_and_meta=nonce_and_meta,
+    )
+
+
+def create_managed_p2p_order(
+    network: Network,
+    expiry: int,
+    maker: str,
+    maker_asset: str,
+    taker_asset: str,
+    maker_amount: int,
+    taker_amount: int,
+    actual_taker: str,
+):
+    # encode taker address inside the nonce and meta and generate a random nonce
+    nonce_and_meta = generate_nonce_and_add_taker(actual_taker)
+    return create_order(
+        expiry=expiry,
+        maker=maker,
+        taker=AUGUSTUS[network],  # ParaSwap managed orders ALWAYS go through AUGUSTUS
         maker_asset=maker_asset,
         taker_asset=taker_asset,
         maker_amount=maker_amount,

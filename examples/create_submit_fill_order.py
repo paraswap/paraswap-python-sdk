@@ -4,16 +4,17 @@ from dotenv import load_dotenv
 from web3 import HTTPProvider, Web3
 from web3.middleware import geth_poa_middleware
 
-from paraswap.orders.fungible_api import FungibleApi
-from paraswap.orders.order import create_order
+from paraswap.orders.fungible_api import create_fungible_api
+from paraswap.orders.order import create_managed_order
 from paraswap.orders.order_helper import OrderHelper
 from paraswap.types import Network
 
 load_dotenv()
 
 api_url = "http://api.paraswap.io"
-order_hash = "0x6f1719be180c3b0987bbeaf63673b05577a0a98aa60c5704532a7e9c5783912c"
-pk = environ.get("PK")
+pk1 = environ.get("PK1")
+pk2 = environ.get("PK2")
+
 http_providers = {
     Network.Ethereum: environ.get("RPC_HTTP_1"),
     Network.Ropsten: environ.get("RPC_HTTP_3"),
@@ -26,40 +27,45 @@ http_providers = {
 }
 provider = HTTPProvider(http_providers[Network.Polygon])
 web3 = Web3(provider)
-account = web3.eth.account.from_key(pk)
+
+account1 = web3.eth.account.from_key(pk1)
+account2 = web3.eth.account.from_key(pk2)
+
 web3.middleware_onion.inject(geth_poa_middleware, layer=0)
-onChainHelper = OrderHelper(
+
+orderHelper = OrderHelper(
     Network.Polygon,
     web3,
 )
 
-ftApi = FungibleApi(Network.Polygon, api_url)
-bo = ftApi.get_orders_by_maker(account.address)
+network = Network.Polygon
+ftApi = create_fungible_api(network, api_url)
+# bo = ftApi.get_orders_by_maker(account1.address)
 
-nonce = web3.eth.get_transaction_count(account.address)
+# nonce = web3.eth.get_transaction_count(account1.address)
 
 # res = onChainHelper.cancel_order(order_hash, {
 #     'nonce': nonce,
 #     'gasPrice': web3.toWei('35', 'gwei'),
 # })
 
-order = create_order(
-    nonce_and_meta=3490796090708800604682573566392112679433383115782363129776701440,
+order = create_managed_order(
+    network=network,
     expiry=0,
     maker="0x05182e579fdfcf69e4390c3411d8fea1fb6467cf",
-    taker="0xdef171fe48cf0115b1d80b88dc8eab59176fee57",
     maker_asset="0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270",
     taker_asset="0x8f3cf7ad23cd3cadbd9735aff958023239c6a063",
     maker_amount=100000000000000,
     taker_amount=84571800000000,
+    actual_taker=account2.address,
 )
 
-res = onChainHelper.sign_order(account, order)
+orderWithSignature = orderHelper.sign_order(account1, order)
 
-print(res.signature, res.hash)
+print(orderWithSignature.signature, orderWithSignature.hash)
 
-# res = ftApi.create_order(orderWithSignature)
-# print(res)
+res = ftApi.create_p2p_order(orderWithSignature)
+print(res)
 
 # res = onChainHelper.fill_order(orderWithSignature, {
 #     'nonce': nonce,
