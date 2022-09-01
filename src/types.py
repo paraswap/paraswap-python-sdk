@@ -1,7 +1,7 @@
 from typing import TypeVar
-from enum import Enum
+from enum import IntEnum
 
-class Network(Enum):
+class Network(IntEnum):
     Ethereum = 1
     Ropsten = 3
     Optimism = 10

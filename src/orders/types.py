@@ -1,5 +1,7 @@
+from typing import Optional, TypedDict
+from typing_extensions import NotRequired
 from eip712_structs import EIP712Struct, Uint, Address
-from enum import IntEnum
+from enum import Enum, IntEnum
 
 # struct Order {
 #     uint256 nonceAndMeta; // Nonce and taker specific metadata
@@ -15,20 +17,36 @@ from enum import IntEnum
 class Order(EIP712Struct):
     nonceAndMeta = Uint(256)
     expiry = Uint(128)
+    makerAsset = Address()
+    takerAsset = Address()
     maker = Address()
     taker = Address()
-    makerAsset = Uint(256)
-    takerAsset = Uint(256)
     makerAmount = Uint(256)
     takerAmount = Uint(256)
 
 class OrderWithSignature():
     order: Order
     signature: str
+    hash: str
 
-    def __init__(self, order: Order, signature: str) -> None:
+    def __init__(self, order: Order, signature: str, hash: str) -> None:
         self.order = order
         self.signature = signature
+        self.hash = hash
+
+    def cast_to_dict(self):
+        order = self.order.data_dict()
+        return {
+            'nonceAndMeta': str(order['nonceAndMeta']),
+            'expiry': str(order['expiry']),
+            'maker': str(order['maker']),
+            'taker': str(order['taker']),
+            'makerAsset': str(order['makerAsset']),
+            'takerAsset': str(order['takerAsset']),
+            'makerAmount': str(order['makerAmount']),
+            'takerAmount': str(order['takerAmount']),
+            'signature': self.signature
+        }
 
 class AssetType(IntEnum):
     ERC20 = 0,
@@ -59,3 +77,46 @@ class OrderNFT(EIP712Struct):
     takerAssetId = Uint(256)
     makerAmount = Uint(256)
     takerAmount = Uint(256)
+
+class OrderType(Enum):
+    LIMIT = 'LIMIT'
+    P2P = 'P2P'
+
+class OrderState(Enum):
+    PENDING = 'PENDING'
+    FULFILLED = 'FULFILLED'
+    CANCELLED = 'CANCELLED'
+    EXPIRED = 'EXPIRED'
+
+class OrderApiResponse(TypedDict):
+    expiry: int
+    createdAt: int
+    transactionHash: NotRequired[str]
+    chainId: int
+    nonceAndMeta: str
+    maker: str
+    taker: str
+    takerFromMeta: str
+    makerAsset: str
+    takerAsset: str
+    makerAmount: str
+    fillableBalance: str
+    swappableBalance: str
+    makerBalance: str
+    isFillOrKill: bool
+    takerAmount: str
+    signature: str
+    orderHash: str
+    permitMakerAsset: Optional[str]
+    type: OrderType
+    state: OrderState
+
+class OrderApiCreationResponse(TypedDict):
+    order: OrderApiResponse
+
+class OrdersApiResponse(TypedDict):
+    limit: int
+    offset: int
+    orders: list[OrderApiResponse]
+    total: int
+    hasMore: bool

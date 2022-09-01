@@ -3,13 +3,15 @@ from web3.middleware import geth_poa_middleware
 from src.orders.order import createOrder
 from src.types import Network
 from src.orders.onchain_api import OrderOnChainHelper, OrderWithSignature
-from os import environ, wait
+from src.orders.fungible_api import FungibleApi
+from os import environ
 from dotenv import load_dotenv
 
 from src.types import Network
 
 load_dotenv()
 
+api_url = 'http://api.paraswap.io'
 order_hash = '0x6f1719be180c3b0987bbeaf63673b05577a0a98aa60c5704532a7e9c5783912c'
 pk = environ.get('PK')
 http_providers = {
@@ -31,6 +33,9 @@ onChainHelper = OrderOnChainHelper(
     web3,
 )
 
+ftApi = FungibleApi(Network.Polygon, api_url)
+bo = ftApi.get_orders_by_maker(account.address)
+
 nonce = web3.eth.get_transaction_count(account.address)
 
 # res = onChainHelper.cancel_order(order_hash, {
@@ -49,12 +54,19 @@ order = createOrder(
     taker_amount=84571800000000
 )
 
-orderWithSignature = OrderWithSignature(order, '0x24d374f78eeaa0fd0d12163c4ef582027c00685b0a6b4d08ad1405267301aec82a6730e586b801bc12be5c0fb1f88ae75e448e5980b3d38710d2156c933fe5de1c')
+# orderWithSignature = OrderWithSignature(order, '0x24d374f78eeaa0fd0d12163c4ef582027c00685b0a6b4d08ad1405267301aec82a6730e586b801bc12be5c0fb1f88ae75e448e5980b3d38710d2156c933fe5de1c')
 
-res = onChainHelper.fill_order(orderWithSignature, {
-    'nonce': nonce,
-    'gasPrice': web3.toWei('35', 'gwei')
-})
+res = onChainHelper.sign_order(account, order)
+
+print(res.signature, res.hash)
+
+# res = ftApi.create_order(orderWithSignature)
+# print(res)
+
+# res = onChainHelper.fill_order(orderWithSignature, {
+#     'nonce': nonce,
+#     'gasPrice': web3.toWei('35', 'gwei')
+# })
 
 # signed = account.sign_transaction(res)
 #

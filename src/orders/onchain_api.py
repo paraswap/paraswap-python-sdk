@@ -1,7 +1,9 @@
+from eip712_structs import make_domain
 from web3 import Web3
-from web3.types import Nonce, TxParams
+from web3 import Account
+from web3.types import TxParams
 
-from .types import OrderWithSignature
+from .types import Order, OrderWithSignature
 from ..config import AUGUSTUS_RFQ
 from ..abi.augustus_rfq_abi import AUGUSTUS_RFQ_ABI
 from ..types import Network
@@ -20,6 +22,13 @@ class OrderOnChainHelper():
             abi=AUGUSTUS_RFQ_ABI,
         )
 
+        self.domain = make_domain(
+            chainId=network,
+            name='AUGUSTUS RFQ',
+            version=1,
+            verifyingContract=self.augustus_rfq_address.lower(),
+        )
+
     def fill_order(self, order: OrderWithSignature, tx_params: TxParams):
         tx = self.augustus_rfq_contract.functions.fillOrder(order.order.data_dict(), order.signature).transact(tx_params)
         return tx
@@ -27,3 +36,12 @@ class OrderOnChainHelper():
     def cancel_order(self, order_hash: str, tx_params: TxParams):
         tx = self.augustus_rfq_contract.functions.cancelOrder(order_hash).buildTransaction(tx_params)
         return tx
+
+    def sign_order(self, account: Account, order: Order) -> OrderWithSignature:
+        signable = order.signable_bytes(self.domain)
+
+        hashed = Web3.keccak(signable)
+        signed = account.signHash(hashed)
+
+
+        return OrderWithSignature(order, signed.signature.hex(), signed.messageHash.hex())
