@@ -32,7 +32,7 @@ class OrderHelper:
     def fill_order(self, order: OrderWithSignature, tx_params: TxParams):
         tx = self.augustus_rfq_contract.functions.fillOrder(
             order.order.data_dict(), order.signature
-        ).transact(tx_params)
+        ).buildTransaction(tx_params)
         return tx
 
     def cancel_order(self, order_hash: str, tx_params: TxParams):

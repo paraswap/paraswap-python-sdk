@@ -1,7 +1,9 @@
 import requests
 
+from ..constants import NULL_ADDRESS
 from ..types import Network
 from ..utils import handle_requests_errors
+from .order import ManagedOrder, OrdersApiWithParsedOrders
 from .types import OrderApiCreationResponse, OrdersApiResponse, OrderWithSignature
 
 
@@ -20,7 +22,9 @@ class Api:
         self.prefix = f"{self.url}/{type}/orders/{network}"
         self.prefix_p2p = f"{self.url}/{type}/p2p/{network}"
 
-    def get_orders_by_address(self, prefix: str, maker_or_taker: str, address: str):
+    def get_orders_by_address(
+        self, prefix: str, maker_or_taker: str, address: str
+    ) -> OrdersApiResponse:
         res = requests.get(f"{prefix}/{maker_or_taker}/{address}")
         handle_requests_errors(res)
 
@@ -35,7 +39,6 @@ class Api:
     def create_order_generic(
         self, prefix: str, order: OrderWithSignature
     ) -> OrderApiCreationResponse:
-        print(prefix)
         res = requests.post(prefix, json=order.cast_to_dict())
         handle_requests_errors(res)
 
@@ -46,6 +49,19 @@ class Api:
 
     def create_p2p_order(self, order: OrderWithSignature) -> OrderApiCreationResponse:
         return self.create_order_generic(self.prefix_p2p, order)
+
+    def get_orderbook(self) -> OrdersApiWithParsedOrders:
+        res = self.get_orders_by_address(self.prefix, "taker", NULL_ADDRESS)
+
+        parsedOrders: OrdersApiWithParsedOrders = {
+            "limit": res["limit"],
+            "offset": res["offset"],
+            "orders": [ManagedOrder(order) for order in res["orders"]],
+            "total": res["total"],
+            "hasMore": res["hasMore"],
+        }
+
+        return parsedOrders
 
 
 def create_fungible_api(network: Network, url: str) -> Api:

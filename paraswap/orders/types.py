@@ -2,7 +2,7 @@ from enum import Enum, IntEnum
 from typing import Optional, TypedDict
 
 from eip712_structs import Address, EIP712Struct, Uint
-from typing_extensions import NotRequired  # type: ignore
+from typing_extensions import NotRequired
 
 # struct Order {
 #     uint256 nonceAndMeta; // Nonce and taker specific metadata
