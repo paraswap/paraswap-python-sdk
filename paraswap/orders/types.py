@@ -131,3 +131,17 @@ class OrdersApiResponse(TypedDict):
     orders: list[OrderApiResponse]
     total: int
     hasMore: bool
+
+
+class OrderbookApiResponse(TypedDict):
+    orders: list[OrderApiResponse]
+
+
+class Pair(TypedDict):
+    makerAsset: str
+    takerAsset: str
+
+
+class PairsApiResponse(TypedDict):
+    sucess: bool
+    pairs: list[Pair]

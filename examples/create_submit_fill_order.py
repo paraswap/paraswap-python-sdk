@@ -6,6 +6,7 @@ from web3 import HTTPProvider, Web3
 from web3.middleware import geth_poa_middleware
 from web3.types import TxParams
 
+from paraswap.exceptions import MissingEnvironmentVariable
 from paraswap.orders.fungible_api import create_fungible_api
 from paraswap.orders.order import create_managed_order
 from paraswap.orders.order_helper import OrderHelper
@@ -24,8 +25,7 @@ def main():
     # our prod is http://api.paraswap.io
     api_url = environ.get("PARASWAP_URL")
     if api_url is None:
-        print("missing api url")
-        sys.exit(1)
+        raise MissingEnvironmentVariable("PARASWAP URL")
 
     # init private key 1
     pk1 = environ.get("PK1")
@@ -45,6 +45,11 @@ def main():
         Network.Arbiturm: environ.get("RPC_HTTP_42161"),
         Network.Avalanche: environ.get("RPC_HTTP_43114"),
     }
+
+    rpc_url = http_providers[network]
+    if rpc_url is None:
+        raise MissingEnvironmentVariable(f"RPC_HTTP_{network}")
+
     # initialize http rpc provider
     provider = HTTPProvider(http_providers[network])
 
@@ -88,7 +93,8 @@ def main():
     # send this signed order to our centralised api.
     # It means that the order will be use in pricing
     res = ftApi.create_order(orderWithSignature)
-    print("Order created", res)
+    print("Order created")
+    print(res)
     print("-----")
 
     # get orders create by account1
@@ -105,16 +111,27 @@ def main():
         print("Did not find the order kill process")
         sys.exit(1)
 
-    print("Get my orders found the created order", orderFromApi)
+    print("Get my orders found the created order")
+    print(orderFromApi)
     print("-----")
 
+    pairs = ftApi.get_orderbook_pairs()
+    found = False
+    for p in pairs:
+        if p["makerAsset"] == MAKER_ASSET and p["takerAsset"] == TAKER_ASSET:
+            found = True
+            break
+
+    if found is not True:
+        print(f"dit not find pair {MAKER_ASSET}_{TAKER_ASSET} in orderbook")
+        sys.exit(1)
+
     # get the whole order book first page
-    orderbook = ftApi.get_orderbook()
-    orders = orderbook["orders"]
+    orderbook = ftApi.get_orderbook(MAKER_ASSET, TAKER_ASSET)
 
     # find the created order in the orderbook
     found_order = None
-    for _order in orders:
+    for _order in orderbook:
         if _order.signature == orderWithSignature.signature:
             found_order = _order
             break

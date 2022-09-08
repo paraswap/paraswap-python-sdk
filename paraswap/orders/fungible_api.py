@@ -1,10 +1,16 @@
 import requests
 
-from ..constants import NULL_ADDRESS
 from ..types import Network
 from ..utils import handle_requests_errors
-from .order import ManagedOrder, OrdersApiWithParsedOrders
-from .types import OrderApiCreationResponse, OrdersApiResponse, OrderWithSignature
+from .order import ManagedOrder
+from .types import (
+    OrderApiCreationResponse,
+    OrderbookApiResponse,
+    OrdersApiResponse,
+    OrderWithSignature,
+    Pair,
+    PairsApiResponse,
+)
 
 
 class Api:
@@ -50,18 +56,21 @@ class Api:
     def create_p2p_order(self, order: OrderWithSignature) -> OrderApiCreationResponse:
         return self.create_order_generic(self.prefix_p2p, order)
 
-    def get_orderbook(self) -> OrdersApiWithParsedOrders:
-        res = self.get_orders_by_address(self.prefix, "taker", NULL_ADDRESS)
+    def get_orderbook_pairs(self) -> list[Pair]:
+        res = requests.get(f"{self.prefix}/pairs")
+        handle_requests_errors(res)
 
-        parsedOrders: OrdersApiWithParsedOrders = {
-            "limit": res["limit"],
-            "offset": res["offset"],
-            "orders": [ManagedOrder(order) for order in res["orders"]],
-            "total": res["total"],
-            "hasMore": res["hasMore"],
-        }
+        casted: PairsApiResponse = res.json()
+        return casted["pairs"]
 
-        return parsedOrders
+    def get_orderbook(self, maker_asset: str, taker_asset: str) -> list[ManagedOrder]:
+        res = requests.get(
+            f"{self.prefix}/orderbook/maker/{maker_asset}/taker/{taker_asset}"
+        )
+        handle_requests_errors(res)
+
+        casted: OrderbookApiResponse = res.json()
+        return [ManagedOrder(order) for order in casted["orders"]]
 
 
 def create_fungible_api(network: Network, url: str) -> Api:
