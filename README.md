@@ -29,4 +29,8 @@ RPC_HTTP_42161=
 RPC_HTTP_43114=
 ```
 
-## Example 1: create a p2p order
+## Examples:
+
+```
+everything in ./examples/
+```
