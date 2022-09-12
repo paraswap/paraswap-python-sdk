@@ -1,2 +1,0 @@
-class RpcHttpMissing(Exception):
-    pass

@@ -1,3 +1,6 @@
 .git/
 .env
-src/__pycacche__/
+**__pycache__/
+build/
+dist/
+paraswap.egg-info/
