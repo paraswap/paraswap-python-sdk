@@ -65,7 +65,7 @@ class Api:
 
     def get_orderbook(self, maker_asset: str, taker_asset: str) -> list[ManagedOrder]:
         res = requests.get(
-            f"{self.prefix}/orderbook/maker/{maker_asset}/taker/{taker_asset}"
+            f"{self.prefix}/orderbook/?makerAsset={maker_asset}&takerAsset={taker_asset}"
         )
         handle_requests_errors(res)
 

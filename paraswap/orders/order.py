@@ -55,7 +55,7 @@ def create_managed_p2p_order(
     maker_amount: int,
     taker_amount: int,
     actual_taker: str,
-    taker: str,
+    taker: str = "",
 ):
     # encode taker address inside the nonce and meta and generate a random nonce
     nonce_and_meta = generate_nonce_and_add_taker(actual_taker)
